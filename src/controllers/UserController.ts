@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { getCustomRepository } from "typeorm";
 import { UsersRepository } from "../repositories/UsersRepository";
+import { hash } from "bcryptjs";
 import * as yup from "yup";
 import { AppError } from "../errors/AppError";
 
@@ -31,14 +32,17 @@ class UserController {
       throw new AppError("User already exists!!");
     }
 
+    const passwordHashed = await hash(password, 8);
+
     //criar o usuário
     const user = usersRepository.create({
       email,
-      password,
+      password: passwordHashed,
     });
 
     await usersRepository.save(user);
 
+    delete user.password;
     return response.status(201).json(user);
   }
 }
