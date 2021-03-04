@@ -27,7 +27,7 @@ class NaverProject {
 
   @ManyToOne(() => Project)
   @JoinColumn({ name: "project_id" })
-  project: Project;
+  project: Project[];
 
   @CreateDateColumn()
   created_at: Date;

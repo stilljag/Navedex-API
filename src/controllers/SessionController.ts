@@ -5,6 +5,7 @@ import { compare } from "bcryptjs";
 import { sign } from "jsonwebtoken";
 import * as yup from "yup";
 import { AppError } from "../errors/AppError";
+import "dotenv/config";
 
 class SessionController {
   async store(request: Request, response: Response) {
@@ -41,9 +42,9 @@ class SessionController {
     }
 
     //criar o token
-    const token = sign({}, "df55340f75b5da454e1c189d56d7f31b", {
+    const token = sign({}, process.env.SECRET, {
       subject: userExists.id,
-      expiresIn: "1d",
+      expiresIn: 86400,
     });
 
     delete userExists.password;
