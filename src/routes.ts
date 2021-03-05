@@ -1,20 +1,21 @@
-import { Router, Request, Response } from "express";
+import { Router } from "express";
 import { UserController } from "./controllers/UserController";
 import { SessionController } from "./controllers/SessionController";
-import auth from "./middlewares/auth";
+import { NaverController } from "./controllers/NaverController";
+import Auth from "./middlewares/auth";
 
 const router = Router();
 
 const userController = new UserController();
 const sessionController = new SessionController();
+const naverController = new NaverController();
 
 router.post("/signup", userController.store);
 router.post("/login", sessionController.store);
 
-router.use(auth);
+router.use(Auth);
 
-router.get("/", (request: Request, response: Response) => {
-  return response.json("autenticou");
-});
+router.get("/navers/:id", naverController.index);
+router.post("/navers/:id", naverController.store);
 
 export { router };
