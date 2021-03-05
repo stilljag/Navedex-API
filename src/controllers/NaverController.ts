@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { getCustomRepository } from "typeorm";
+import { getCustomRepository, QueryBuilder } from "typeorm";
 import { UsersRepository } from "../repositories/UsersRepository";
 import { NaversRepository } from "../repositories/NaversRepository";
 import * as yup from "yup";
@@ -24,9 +24,9 @@ class NaverController {
       throw new AppError(error.errors);
     }
 
+    //verifica se o usuario existe
     const usersRepository = getCustomRepository(UsersRepository);
 
-    //verifica se o usuario existe
     const userExists = await usersRepository.findOne({
       id: String(id),
     });
@@ -56,10 +56,9 @@ class NaverController {
   }
 
   async index(request: Request, response: Response) {
-    const { name, admission_date, job_role } = request.query;
+    let { name, admission_date, job_role } = request.query;
 
     const id = request.params.id;
-    console.log(name, admission_date, job_role);
 
     //verifica se o usuario existe
     const usersRepository = getCustomRepository(UsersRepository);
@@ -81,19 +80,17 @@ class NaverController {
     const naversRepository = getCustomRepository(NaversRepository);
 
     let navers = await naversRepository.find({
-      user_id: String(id),
-      job_role: String(job_role),
+      where: request.query, //queries,
     });
 
-    if (!navers) {
+    //filtra query pelo id do usuário
+    const filterNavers = navers.filter((i) => i.user_id == id);
+
+    if (!navers || navers.length == 0 || filterNavers.length == 0) {
       throw new AppError("Navers not found!!");
     }
 
-    if (navers.length == 0) {
-      throw new AppError("No navers registration in this user");
-    }
-
-    return response.json({ navers });
+    return response.json({ Navers: filterNavers });
   }
 }
 
