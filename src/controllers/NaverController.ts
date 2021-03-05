@@ -1,13 +1,21 @@
 import { Request, Response } from "express";
-import { getCustomRepository, QueryBuilder } from "typeorm";
+import { getCustomRepository } from "typeorm";
 import { UsersRepository } from "../repositories/UsersRepository";
 import { NaversRepository } from "../repositories/NaversRepository";
+import { NaversProjectsRepository } from "../repositories/NaversProjectsRepository";
 import * as yup from "yup";
 import { AppError } from "../errors/AppError";
+import { ProjectsRepository } from "../repositories/ProjectsRepository";
 
 class NaverController {
   async store(request: Request, response: Response) {
-    const { name, birthdate, admission_date, job_role } = request.body;
+    const {
+      name,
+      birthdate,
+      admission_date,
+      job_role,
+      projects,
+    } = request.body;
     const id = request.params.id;
 
     //validações
@@ -16,6 +24,7 @@ class NaverController {
       birthdate: yup.string().required("Data de nascimento é obrigatório"),
       admission_date: yup.string().required("Data de admissão é obrigatório"),
       job_role: yup.string().required("Função é obrigatório"),
+      //projects: yup.string().required("Projeto é obrigatório"),
     });
 
     try {
@@ -40,8 +49,17 @@ class NaverController {
       throw new AppError("Token does not belong to the user!!", 401);
     }
 
-    const naversRepository = getCustomRepository(NaversRepository);
+    //verifica se os projetos existem
+    const projectsRepository = getCustomRepository(ProjectsRepository);
+
+    const projectsExists = await projectsRepository.findByIds(projects);
+
+    if (projectsExists.length != projects.length) {
+      throw new AppError("Project not found!!");
+    }
+
     //criar o naver
+    const naversRepository = getCustomRepository(NaversRepository);
     const naver = naversRepository.create({
       name,
       birthdate,
@@ -52,11 +70,29 @@ class NaverController {
 
     await naversRepository.save(naver);
 
-    return response.status(201).json(naver);
+    //cria o projeto
+    const naversProjectRepository = getCustomRepository(
+      NaversProjectsRepository
+    );
+
+    const saveProject = naversProjectRepository.create({
+      naver_id: naver.id,
+      project_id: projects,
+    });
+
+    await naversProjectRepository.save(saveProject);
+
+    return response.status(201).json({ naver, saveProject });
   }
 
   async index(request: Request, response: Response) {
     let { name, admission_date, job_role } = request.query;
+
+    // const queries = {
+    //   name: String(name).toUpperCase(),
+    //   admission_date: String(admission_date).toUpperCase(),
+    //   job_role: String(job_role).toUpperCase(),
+    // };
 
     const id = request.params.id;
 

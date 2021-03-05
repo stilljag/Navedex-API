@@ -3,6 +3,7 @@ import {
   CreateDateColumn,
   Entity,
   JoinColumn,
+  ManyToMany,
   ManyToOne,
   PrimaryColumn,
 } from "typeorm";
@@ -18,16 +19,16 @@ class NaverProject {
   @Column()
   naver_id: string;
 
-  @ManyToOne(() => Naver)
+  @ManyToMany(() => Naver)
   @JoinColumn({ name: "naver_id" })
   naver: Naver;
 
   @Column()
   project_id: string;
 
-  @ManyToOne(() => Project)
-  @JoinColumn({ name: "project_id" })
-  project: Project[];
+  // @ManyToMany(() => Project)
+  // @JoinColumn({ name: "project_id" })
+  // project: Project;
 
   @CreateDateColumn()
   created_at: Date;
