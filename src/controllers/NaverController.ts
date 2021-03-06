@@ -71,29 +71,22 @@ class NaverController {
     await naversRepository.save(naver);
 
     //cria o projeto
-    const naversProjectRepository = getCustomRepository(
-      NaversProjectsRepository
-    );
+    // const naversProjectRepository = getCustomRepository(
+    //   NaversProjectsRepository
+    // );
 
-    const saveProject = naversProjectRepository.create({
-      naver_id: naver.id,
-      project_id: projects,
-    });
+    // const saveProject = naversProjectRepository.create({
+    //   naver_id: naver.id,
+    //   project_id: projects,
+    // });
 
-    await naversProjectRepository.save(saveProject);
+    // await naversProjectRepository.save(saveProject); , saveProject
 
-    return response.status(201).json({ naver, saveProject });
+    return response.status(201).json({ naver });
   }
 
   async index(request: Request, response: Response) {
     let { name, admission_date, job_role } = request.query;
-
-    // const queries = {
-    //   name: String(name).toUpperCase(),
-    //   admission_date: String(admission_date).toUpperCase(),
-    //   job_role: String(job_role).toUpperCase(),
-    // };
-
     const id = request.params.id;
 
     //verifica se o usuario existe
@@ -127,6 +120,88 @@ class NaverController {
     }
 
     return response.json({ Navers: filterNavers });
+  }
+
+  async show(request: Request, response: Response) {
+    const { id, naver_id } = request.params;
+
+    //verifica se o usuario existe
+    const usersRepository = getCustomRepository(UsersRepository);
+
+    const userExists = await usersRepository.findOne({
+      id: String(id),
+    });
+
+    if (!userExists) {
+      throw new AppError("User not found!!");
+    }
+
+    //verificar se o token é do usuario
+    if (process.env.DECODED != id) {
+      throw new AppError("Token does not belong to the user!!", 401);
+    }
+
+    //verifica se o Naver existe
+    const naversRepository = getCustomRepository(NaversRepository);
+
+    const naverExists = await naversRepository.findOne({
+      id: String(naver_id),
+    });
+
+    if (!naverExists) {
+      throw new AppError("Naver not found!!");
+    }
+
+    if (naverExists.user_id != id)
+      throw new AppError("Naver does not belong to the user!!");
+
+    return response.json({ Navers: naverExists });
+  }
+
+  async delete(request: Request, response: Response) {
+    const { id, naver_id } = request.params;
+
+    //verifica se o usuario existe
+    const usersRepository = getCustomRepository(UsersRepository);
+
+    const userExists = await usersRepository.findOne({
+      id: String(id),
+    });
+
+    if (!userExists) {
+      throw new AppError("User not found!!");
+    }
+
+    //verificar se o token é do usuario
+    if (process.env.DECODED != id) {
+      throw new AppError("Token does not belong to the user!!", 401);
+    }
+
+    //verifica se o Naver existe
+    const naversRepository = getCustomRepository(NaversRepository);
+
+    const naverExists = await naversRepository.findOne({
+      id: String(naver_id),
+    });
+
+    if (!naverExists) {
+      throw new AppError("Naver not found!!");
+    }
+
+    if (naverExists.user_id != id)
+      throw new AppError("Naver does not belong to the user!!");
+
+    try {
+      await getCustomRepository(NaversRepository)
+        .createQueryBuilder()
+        .delete()
+        .where("id = :id", { id: naverExists.id })
+        .execute();
+    } catch (error) {
+      throw new AppError(error);
+    }
+
+    return response.status(200).json("Naver successfully deleted!");
   }
 }
 
