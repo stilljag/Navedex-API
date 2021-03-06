@@ -1,15 +1,10 @@
 import { Request, Response } from "express";
-import {
-  createQueryBuilder,
-  getConnection,
-  getCustomRepository,
-} from "typeorm";
+import * as yup from "yup";
+import { createQueryBuilder, getCustomRepository } from "typeorm";
 import { UsersRepository } from "../repositories/UsersRepository";
 import { NaversRepository } from "../repositories/NaversRepository";
-import { NaversProjectsRepository } from "../repositories/NaversProjectsRepository";
-import * as yup from "yup";
-import { AppError } from "../errors/AppError";
 import { ProjectsRepository } from "../repositories/ProjectsRepository";
+import { AppError } from "../errors/AppError";
 
 class NaverController {
   async store(request: Request, response: Response) {
