@@ -25,6 +25,10 @@ router.put("/navers/:id/:naver_id", naverController.update);
 router.delete("/navers/:id/:naver_id", naverController.delete);
 
 //projects
+router.get("/projects/:id", projectController.index);
+router.get("/projects/:id/:project_id", projectController.show);
 router.post("/projects/:id", projectController.store);
+router.put("/projects/:id/:project_id", projectController.update);
+router.delete("/projects/:id/:project_id", projectController.delete);
 
 export { router };
