@@ -26,9 +26,9 @@ class NaverProject {
   @Column()
   project_id: string;
 
-  // @ManyToMany(() => Project)
-  // @JoinColumn({ name: "project_id" })
-  // project: Project;
+  @ManyToMany(() => Project)
+  @JoinColumn({ name: "project_id" })
+  project: Project[];
 
   @CreateDateColumn()
   created_at: Date;

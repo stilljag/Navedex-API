@@ -34,16 +34,16 @@ export class CreateNaversProjects1614799899242 implements MigrationInterface {
             onDelete: "CASCADE",
             onUpdate: "CASCADE",
           },
+
+          {
+            name: "FKProject",
+            referencedTableName: "projects",
+            referencedColumnNames: ["id"],
+            columnNames: ["project_id"],
+            onDelete: "CASCADE",
+            onUpdate: "CASCADE",
+          },
         ],
-        //   {
-        //     name: "FKProject",
-        //     referencedTableName: "projects",
-        //     referencedColumnNames: ["id"],
-        //     columnNames: ["project_id"],
-        //     onDelete: "CASCADE",
-        //     onUpdate: "CASCADE",
-        //   },
-        // ],
       })
     );
   }

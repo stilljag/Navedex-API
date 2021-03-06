@@ -19,7 +19,9 @@ router.post("/login", sessionController.store);
 router.use(Auth);
 //navers
 router.get("/navers/:id", naverController.index);
+router.get("/navers/:id/:naver_id", naverController.show);
 router.post("/navers/:id", naverController.store);
+router.delete("/navers/:id/:naver_id", naverController.delete);
 
 //projects
 router.post("/projects/:id", projectController.store);
