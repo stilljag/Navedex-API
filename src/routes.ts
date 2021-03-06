@@ -21,6 +21,7 @@ router.use(Auth);
 router.get("/navers/:id", naverController.index);
 router.get("/navers/:id/:naver_id", naverController.show);
 router.post("/navers/:id", naverController.store);
+router.put("/navers/:id/:naver_id", naverController.update);
 router.delete("/navers/:id/:naver_id", naverController.delete);
 
 //projects
