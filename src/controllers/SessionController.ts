@@ -8,7 +8,7 @@ import { AppError } from "../errors/AppError";
 import "dotenv/config";
 
 class SessionController {
-  async store(request: Request, response: Response) {
+  async execute(request: Request, response: Response) {
     const { email, password } = request.body;
 
     //validações

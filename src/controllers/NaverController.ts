@@ -57,6 +57,11 @@ class NaverController {
       throw new AppError("Project not found!!");
     }
 
+    projectsExists.forEach((element) => {
+      if (element.user_id != id)
+        throw new AppError("Projects does not belong to the user!!");
+    });
+
     //criar o naver
     const naversRepository = getCustomRepository(NaversRepository);
     const naver = naversRepository.create({
@@ -134,6 +139,10 @@ class NaverController {
     if (projectsExists.length != projects.length) {
       throw new AppError("Project not found!!");
     }
+    projectsExists.forEach((element) => {
+      if (element.user_id != id)
+        throw new AppError("Projects does not belong to the user!!");
+    });
 
     //verifica se o Naver existe
     const naversRepository = getCustomRepository(NaversRepository);
@@ -157,6 +166,7 @@ class NaverController {
           birthdate,
           admission_date,
           job_role,
+          user_id: userExists.id,
         })
         .where("id = :id", { id: naverExists.id })
         .execute();
