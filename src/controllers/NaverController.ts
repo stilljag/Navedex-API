@@ -1,10 +1,13 @@
 import { Request, Response } from "express";
-import * as yup from "yup";
 import { createQueryBuilder, getCustomRepository } from "typeorm";
+import * as yup from "yup";
+
 import { UsersRepository } from "../repositories/UsersRepository";
 import { NaversRepository } from "../repositories/NaversRepository";
 import { ProjectsRepository } from "../repositories/ProjectsRepository";
+
 import { AppError } from "../errors/AppError";
+import { Verify } from "../utils/Verify";
 
 class NaverController {
   async store(request: Request, response: Response) {
@@ -33,36 +36,23 @@ class NaverController {
     }
 
     //verifica se o usuario existe
-    const usersRepository = getCustomRepository(UsersRepository);
-
-    const userExists = await usersRepository.findOne({
-      id: String(id),
-    });
-
-    if (!userExists) {
-      throw new AppError("User not found!!");
-    }
-
-    //verificar se o token é do usuario
-    if (process.env.DECODED != id) {
-      throw new AppError("Token does not belong to the user!!", 401);
-    }
+    const userExists = await new Verify().userExists(String(id));
 
     //verifica se os projetos existem
     const projectsRepository = getCustomRepository(ProjectsRepository);
 
     const projectsExists = await projectsRepository.findByIds(projects);
 
-    if (projectsExists.length != projects.length) {
-      throw new AppError("Project not found!!");
-    }
-
     projectsExists.forEach((element) => {
-      if (element.user_id != id)
+      if (element.user_id != id) {
         throw new AppError("Projects does not belong to the user!!");
+      } else {
+        if (projectsExists.length != projects.length)
+          throw new AppError("Project not found!!");
+      }
     });
 
-    //criar o naver
+    //cria o naver
     const naversRepository = getCustomRepository(NaversRepository);
     const naver = naversRepository.create({
       name,
@@ -116,47 +106,24 @@ class NaverController {
     }
 
     //verifica se o usuario existe
-    const usersRepository = getCustomRepository(UsersRepository);
+    const userExists = await new Verify().userExists(String(id));
 
-    const userExists = await usersRepository.findOne({
-      id: String(id),
-    });
-
-    if (!userExists) {
-      throw new AppError("User not found!!");
-    }
-
-    //verificar se o token é do usuario
-    if (process.env.DECODED != id) {
-      throw new AppError("Token does not belong to the user!!", 401);
-    }
+    //verifica se o Naver existe
+    const naverExists = await new Verify().naverExists(id, naver_id);
 
     //verifica se os projetos existem
     const projectsRepository = getCustomRepository(ProjectsRepository);
 
     const projectsExists = await projectsRepository.findByIds(projects);
 
-    if (projectsExists.length != projects.length) {
-      throw new AppError("Project not found!!");
-    }
     projectsExists.forEach((element) => {
-      if (element.user_id != id)
+      if (element.user_id != id) {
         throw new AppError("Projects does not belong to the user!!");
+      } else {
+        if (projectsExists.length != projects.length)
+          throw new AppError("Project not found!!");
+      }
     });
-
-    //verifica se o Naver existe
-    const naversRepository = getCustomRepository(NaversRepository);
-
-    const naverExists = await naversRepository.findOne({
-      id: String(naver_id),
-    });
-
-    if (!naverExists) {
-      throw new AppError("Naver not found!!");
-    }
-
-    if (naverExists.user_id != id)
-      throw new AppError("Naver does not belong to the user!!");
 
     try {
       const naver = await createQueryBuilder()
@@ -184,34 +151,14 @@ class NaverController {
     const id = request.params.id;
 
     //verifica se o usuario existe
-    const usersRepository = getCustomRepository(UsersRepository);
-
-    const userExists = await usersRepository.findOne({
-      id: String(id),
-    });
-
-    if (!userExists) {
-      throw new AppError("User not found!!");
-    }
-
-    //verificar se o token é do usuario
-    if (process.env.DECODED != id) {
-      throw new AppError("Token does not belong to the user!!", 401);
-    }
-
-    //verificar se existe navers cadastrados pelo usuario
-    const naversRepository = getCustomRepository(NaversRepository);
-
-    let navers = await naversRepository.find({
-      where: request.query, //queries,
-    });
+    await new Verify().userExists(String(id));
 
     //filtra query pelo id do usuário
-    const filterNavers = navers.filter((i) => i.user_id == id);
-
-    if (!navers || navers.length == 0 || filterNavers.length == 0) {
-      throw new AppError("Navers not found!!");
-    }
+    const filterNavers = await new Verify().registerOfUser(
+      "Naver",
+      request.query,
+      String(id)
+    );
 
     return response.json({ Navers: filterNavers });
   }
@@ -220,34 +167,10 @@ class NaverController {
     const { id, naver_id } = request.params;
 
     //verifica se o usuario existe
-    const usersRepository = getCustomRepository(UsersRepository);
-
-    const userExists = await usersRepository.findOne({
-      id: String(id),
-    });
-
-    if (!userExists) {
-      throw new AppError("User not found!!");
-    }
-
-    //verificar se o token é do usuario
-    if (process.env.DECODED != id) {
-      throw new AppError("Token does not belong to the user!!", 401);
-    }
+    await new Verify().userExists(String(id));
 
     //verifica se o Naver existe
-    const naversRepository = getCustomRepository(NaversRepository);
-
-    const naverExists = await naversRepository.findOne({
-      id: String(naver_id),
-    });
-
-    if (!naverExists) {
-      throw new AppError("Naver not found!!");
-    }
-
-    if (naverExists.user_id != id)
-      throw new AppError("Naver does not belong to the user!!");
+    const naverExists = await new Verify().naverExists(id, naver_id);
 
     return response.json({ Navers: naverExists });
   }
@@ -256,35 +179,12 @@ class NaverController {
     const { id, naver_id } = request.params;
 
     //verifica se o usuario existe
-    const usersRepository = getCustomRepository(UsersRepository);
-
-    const userExists = await usersRepository.findOne({
-      id: String(id),
-    });
-
-    if (!userExists) {
-      throw new AppError("User not found!!");
-    }
-
-    //verificar se o token é do usuario
-    if (process.env.DECODED != id) {
-      throw new AppError("Token does not belong to the user!!", 401);
-    }
+    await new Verify().userExists(String(id));
 
     //verifica se o Naver existe
-    const naversRepository = getCustomRepository(NaversRepository);
+    const naverExists = await new Verify().naverExists(id, naver_id);
 
-    const naverExists = await naversRepository.findOne({
-      id: String(naver_id),
-    });
-
-    if (!naverExists) {
-      throw new AppError("Naver not found!!");
-    }
-
-    if (naverExists.user_id != id)
-      throw new AppError("Naver does not belong to the user!!");
-
+    //deleta o naver
     try {
       await getCustomRepository(NaversRepository)
         .createQueryBuilder()

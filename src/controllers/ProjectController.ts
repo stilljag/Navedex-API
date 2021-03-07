@@ -1,9 +1,11 @@
 import { Request, Response } from "express";
 import * as yup from "yup";
+
 import { createQueryBuilder, getCustomRepository } from "typeorm";
-import { UsersRepository } from "../repositories/UsersRepository";
 import { ProjectsRepository } from "../repositories/ProjectsRepository";
+
 import { AppError } from "../errors/AppError";
+import { Verify } from "../utils/Verify";
 
 class ProjectController {
   async store(request: Request, response: Response) {
@@ -22,20 +24,7 @@ class ProjectController {
     }
 
     //verifica se o usuario existe
-    const usersRepository = getCustomRepository(UsersRepository);
-
-    const userExists = await usersRepository.findOne({
-      id: String(id),
-    });
-
-    if (!userExists) {
-      throw new AppError("User not found!!");
-    }
-
-    //verificar se o token é do usuario
-    if (process.env.DECODED != id) {
-      throw new AppError("Token does not belong to the user!!", 401);
-    }
+    const userExists = await new Verify().userExists(String(id));
 
     //criar o project
     const projectRepository = getCustomRepository(ProjectsRepository);
@@ -67,36 +56,12 @@ class ProjectController {
     }
 
     //verifica se o usuario existe
-    const usersRepository = getCustomRepository(UsersRepository);
+    const userExists = await new Verify().userExists(String(id));
 
-    const userExists = await usersRepository.findOne({
-      id: String(id),
-    });
+    //verifica se o Projeto existe
+    const projectExists = await new Verify().projectExists(id, project_id);
 
-    if (!userExists) {
-      throw new AppError("User not found!!");
-    }
-
-    //verificar se o token é do usuario
-    if (process.env.DECODED != id) {
-      throw new AppError("Token does not belong to the user!!", 401);
-    }
-
-    //verifica se o projeto existe
-    const projectsRepository = getCustomRepository(ProjectsRepository);
-
-    const projectsExists = await projectsRepository.findOne({
-      id: String(project_id),
-    });
-
-    if (!projectsExists) {
-      throw new AppError("Project not found!!");
-    }
-
-    //verifica se o projeto pertence ao usuariao
-    if (projectsExists.user_id != id)
-      throw new AppError("project does not belong to the user!!");
-
+    //atualiza o projeto
     try {
       const project = await createQueryBuilder()
         .update("projects")
@@ -104,7 +69,7 @@ class ProjectController {
           name,
           user_id: userExists.id,
         })
-        .where("id = :id", { id: projectsExists.id })
+        .where("id = :id", { id: projectExists.id })
         .execute();
 
       return response
@@ -120,34 +85,14 @@ class ProjectController {
     const id = request.params.id;
 
     //verifica se o usuario existe
-    const usersRepository = getCustomRepository(UsersRepository);
-
-    const userExists = await usersRepository.findOne({
-      id: String(id),
-    });
-
-    if (!userExists) {
-      throw new AppError("User not found!!");
-    }
-
-    //verificar se o token é do usuario
-    if (process.env.DECODED != id) {
-      throw new AppError("Token does not belong to the user!!", 401);
-    }
-
-    //verificar se existe navers cadastrados pelo usuario
-    const projectsRepository = getCustomRepository(ProjectsRepository);
-
-    let projects = await projectsRepository.find({
-      where: request.query, //queries,
-    });
+    await new Verify().userExists(String(id));
 
     //filtra query pelo id do usuário
-    const filterProjects = projects.filter((i) => i.user_id == id);
-
-    if (!projects || projects.length == 0 || filterProjects.length == 0) {
-      throw new AppError("Projects not found!!");
-    }
+    const filterProjects = await new Verify().registerOfUser(
+      "Project",
+      request.query,
+      String(id)
+    );
 
     return response.json({ projects: filterProjects });
   }
@@ -156,34 +101,10 @@ class ProjectController {
     const { id, project_id } = request.params;
 
     //verifica se o usuario existe
-    const usersRepository = getCustomRepository(UsersRepository);
-
-    const userExists = await usersRepository.findOne({
-      id: String(id),
-    });
-
-    if (!userExists) {
-      throw new AppError("User not found!!");
-    }
-
-    //verificar se o token é do usuario
-    if (process.env.DECODED != id) {
-      throw new AppError("Token does not belong to the user!!", 401);
-    }
+    await new Verify().userExists(String(id));
 
     //verifica se o Projeto existe
-    const projectsRepository = getCustomRepository(ProjectsRepository);
-
-    const projectExists = await projectsRepository.findOne({
-      id: String(project_id),
-    });
-
-    if (!projectExists) {
-      throw new AppError("Project not found!!");
-    }
-
-    if (projectExists.user_id != id)
-      throw new AppError("Project does not belong to the user!!");
+    const projectExists = await new Verify().projectExists(id, project_id);
 
     return response.json({ Navers: projectExists });
   }
@@ -192,35 +113,12 @@ class ProjectController {
     const { id, project_id } = request.params;
 
     //verifica se o usuario existe
-    const usersRepository = getCustomRepository(UsersRepository);
-
-    const userExists = await usersRepository.findOne({
-      id: String(id),
-    });
-
-    if (!userExists) {
-      throw new AppError("User not found!!");
-    }
-
-    //verificar se o token é do usuario
-    if (process.env.DECODED != id) {
-      throw new AppError("Token does not belong to the user!!", 401);
-    }
+    const userExists = await new Verify().userExists(String(id));
 
     //verifica se o Projeto existe
-    const projectsRepository = getCustomRepository(ProjectsRepository);
+    const projectExists = await new Verify().projectExists(id, project_id);
 
-    const projectExists = await projectsRepository.findOne({
-      id: String(project_id),
-    });
-
-    if (!projectExists) {
-      throw new AppError("Project not found!!");
-    }
-
-    if (projectExists.user_id != id)
-      throw new AppError("Project does not belong to the user!!");
-
+    //deleta projeto
     try {
       await getCustomRepository(ProjectsRepository)
         .createQueryBuilder()

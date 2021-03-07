@@ -1,11 +1,11 @@
 import { Request, Response } from "express";
-import { getCustomRepository } from "typeorm";
-import { UsersRepository } from "../repositories/UsersRepository";
 import { compare } from "bcryptjs";
 import { sign } from "jsonwebtoken";
 import * as yup from "yup";
-import { AppError } from "../errors/AppError";
 import "dotenv/config";
+
+import { AppError } from "../errors/AppError";
+import { Verify } from "../utils/Verify";
 
 class SessionController {
   async execute(request: Request, response: Response) {
@@ -23,19 +23,9 @@ class SessionController {
       throw new AppError(error.errors);
     }
 
-    const usersRepository = getCustomRepository(UsersRepository);
+    const userExists = new Verify().userExistsLogin(email);
 
-    //verifica se o usuário existe
-    const userExists = await usersRepository.findOne({
-      email,
-    });
-
-    if (!userExists) {
-      throw new AppError("User not found!!");
-    }
-
-    //verificar password
-    const matchPassword = await compare(password, userExists.password);
+    const matchPassword = await compare(password, (await userExists).password);
 
     if (!matchPassword) {
       throw new AppError("Incorrect password or username!");
@@ -43,14 +33,14 @@ class SessionController {
 
     //criar o token
     const token = sign({}, process.env.SECRET, {
-      subject: userExists.id,
+      subject: (await userExists).id,
       expiresIn: 86400,
     });
 
-    delete userExists.password;
+    delete (await userExists).password;
     return response.status(201).json({
       token,
-      userExists,
+      user: await userExists,
     });
   }
 }
