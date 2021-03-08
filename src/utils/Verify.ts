@@ -62,6 +62,20 @@ class Verify {
     return project;
   }
 
+  async projectExistsNaver(id: string, projects: []) {
+    const projectsExists = await this.projectsRepository.findByIds(projects);
+
+    if (projectsExists.length != projects.length)
+      throw new AppError("Project not found!!");
+
+    projectsExists.forEach((element) => {
+      if (element.user_id != id)
+        throw new AppError("Projects does not belong to the user!!");
+    });
+
+    return projectsExists;
+  }
+
   async naverExists(id: string, naver_id: string) {
     const naver = await this.naversRepository.findOne({
       id: String(naver_id),

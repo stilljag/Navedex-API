@@ -1,10 +1,8 @@
 import { Request, Response } from "express";
-import { createQueryBuilder, getCustomRepository } from "typeorm";
 import * as yup from "yup";
 
-import { UsersRepository } from "../repositories/UsersRepository";
+import { createQueryBuilder, getCustomRepository } from "typeorm";
 import { NaversRepository } from "../repositories/NaversRepository";
-import { ProjectsRepository } from "../repositories/ProjectsRepository";
 
 import { AppError } from "../errors/AppError";
 import { Verify } from "../utils/Verify";
@@ -19,6 +17,7 @@ class NaverController {
       projects,
     } = request.body;
     const id = request.params.id;
+    console.log(projects);
 
     //validações
     const schema = yup.object().shape({
@@ -39,18 +38,7 @@ class NaverController {
     const userExists = await new Verify().userExists(String(id));
 
     //verifica se os projetos existem
-    const projectsRepository = getCustomRepository(ProjectsRepository);
-
-    const projectsExists = await projectsRepository.findByIds(projects);
-
-    projectsExists.forEach((element) => {
-      if (element.user_id != id) {
-        throw new AppError("Projects does not belong to the user!!");
-      } else {
-        if (projectsExists.length != projects.length)
-          throw new AppError("Project not found!!");
-      }
-    });
+    await new Verify().projectExistsNaver(String(id), projects);
 
     //cria o naver
     const naversRepository = getCustomRepository(NaversRepository);
@@ -112,18 +100,7 @@ class NaverController {
     const naverExists = await new Verify().naverExists(id, naver_id);
 
     //verifica se os projetos existem
-    const projectsRepository = getCustomRepository(ProjectsRepository);
-
-    const projectsExists = await projectsRepository.findByIds(projects);
-
-    projectsExists.forEach((element) => {
-      if (element.user_id != id) {
-        throw new AppError("Projects does not belong to the user!!");
-      } else {
-        if (projectsExists.length != projects.length)
-          throw new AppError("Project not found!!");
-      }
-    });
+    await new Verify().projectExistsNaver(String(id), projects);
 
     try {
       const naver = await createQueryBuilder()
