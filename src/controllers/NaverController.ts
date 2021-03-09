@@ -1,7 +1,9 @@
 import { Request, Response } from "express";
+import moment from "moment";
 import * as yup from "yup";
 
 import { createQueryBuilder, getCustomRepository } from "typeorm";
+
 import { NaversRepository } from "../repositories/NaversRepository";
 import { NaversProjectsRepository } from "../repositories/NaversProjectsRepository";
 
@@ -18,7 +20,6 @@ class NaverController {
       projects,
     } = request.body;
     const id = request.params.id;
-    console.log(projects);
 
     //validações
     const schema = yup.object().shape({
@@ -42,11 +43,12 @@ class NaverController {
     await new Verify().projectExistsNaver(String(id), projects);
 
     //cria o naver
+
     const naversRepository = getCustomRepository(NaversRepository);
     const naver = naversRepository.create({
       name,
-      birthdate,
-      admission_date,
+      birthdate: moment(birthdate).format("MM/DD/yyyy"),
+      admission_date: moment(admission_date).format("MM/DD/yyyy"),
       job_role,
       user_id: userExists.id,
     });
@@ -103,21 +105,57 @@ class NaverController {
     //verifica se o Naver existe
     const naverExists = await new Verify().naverExists(id, naver_id);
 
+    const naversProjectsRepository = getCustomRepository(
+      NaversProjectsRepository
+    );
+    const nave = await naversProjectsRepository.find({
+      where: { naver_id: String(naver_id) },
+      relations: ["naverProjectId", "projectId"],
+      select: ["project_id", "naverProjectId"],
+    });
+
+    const projectsArray = [];
+    nave.map((map) => {
+      return projectsArray.push(map.projectId.id);
+    });
+
     //verifica se os projetos existem
-    await new Verify().projectExistsNaver(String(id), projects);
+    const projectExists = await new Verify().projectExistsNaver(
+      String(id),
+      projects
+    );
 
     try {
       const naver = await createQueryBuilder()
         .update("navers")
         .set({
           name,
-          birthdate,
-          admission_date,
+          birthdate: moment(birthdate).format("MM/DD/yyyy"),
+          admission_date: moment(admission_date).format("MM/DD/yyyy"),
           job_role,
           user_id: userExists.id,
         })
         .where("id = :id", { id: naverExists.id })
         .execute();
+
+      //deleta projetos antigos
+
+      for await (const i of projectsArray) {
+        await getCustomRepository(NaversProjectsRepository)
+          .createQueryBuilder()
+          .delete()
+          .where("project_id = :project_id", { project_id: String(i) })
+          .execute();
+      }
+
+      for await (const i of projects) {
+        const saveProject = naversProjectsRepository.create({
+          naver_id: naverExists.id,
+          project_id: i,
+        });
+
+        await naversProjectsRepository.save(saveProject); //, saveProject
+      }
 
       return response
         .status(200)
@@ -144,7 +182,7 @@ class NaverController {
     return response.json({ Navers: filterNavers });
   }
 
-  async show(request: Request, response: Response) {
+  async show(request: Request, response: Response): Promise<Response> {
     const { id, naver_id } = request.params;
 
     //verifica se o usuario existe
@@ -153,7 +191,35 @@ class NaverController {
     //verifica se o Naver existe
     const naverExists = await new Verify().naverExists(id, naver_id);
 
-    return response.json({ Navers: naverExists });
+    const naversProjectsRepository = getCustomRepository(
+      NaversProjectsRepository
+    );
+    const nave = await naversProjectsRepository.find({
+      where: { naver_id: String(naver_id) },
+      relations: ["naverProjectId", "projectId"],
+      select: ["project_id", "naverProjectId"],
+    });
+
+    const data = { nave };
+    const projectsArray = [];
+    const info = data.nave.map((map) => {
+      projectsArray.push({ Id: map.projectId.id, Name: map.projectId.name });
+
+      const data = [
+        {
+          id: map.naverProjectId.id,
+          name: map.naverProjectId.name,
+          birthdate: map.naverProjectId.birthdate,
+          admission_date: map.naverProjectId.admission_date,
+          job_role: map.naverProjectId.job_role,
+        },
+      ];
+
+      return data;
+    });
+    const newdata = { Naver: info[0], Projects: projectsArray };
+
+    return response.json(newdata);
   }
 
   async delete(request: Request, response: Response) {

@@ -3,6 +3,8 @@ import * as yup from "yup";
 
 import { createQueryBuilder, getCustomRepository } from "typeorm";
 import { ProjectsRepository } from "../repositories/ProjectsRepository";
+import { NaversRepository } from "../repositories/NaversRepository";
+import { NaversProjectsRepository } from "../repositories/NaversProjectsRepository";
 
 import { AppError } from "../errors/AppError";
 import { Verify } from "../utils/Verify";
