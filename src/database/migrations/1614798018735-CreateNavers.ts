@@ -17,11 +17,11 @@ export class CreateNavers1614798018735 implements MigrationInterface {
           },
           {
             name: "birthdate",
-            type: "timestamp",
+            type: "varchar",
           },
           {
             name: "admission_date",
-            type: "timestamp",
+            type: "varchar",
           },
           {
             name: "job_role",

@@ -36,7 +36,7 @@ class Verify {
     if (orign == "Project") {
       source = await this.projectsRepository.find({ where: query });
     } else {
-      source = await this.naversRepository.find({ where: query });
+      source = await await this.naversRepository.find({ where: query });
     }
 
     //filtra query pelo id do usuário
