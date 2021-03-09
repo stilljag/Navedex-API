@@ -3,8 +3,8 @@ import {
   CreateDateColumn,
   Entity,
   JoinColumn,
+  JoinTable,
   ManyToMany,
-  ManyToOne,
   PrimaryColumn,
 } from "typeorm";
 import { v4 as uuid } from "uuid";
@@ -20,14 +20,14 @@ class NaverProject {
   naver_id: string;
 
   @ManyToMany(() => Naver)
-  @JoinColumn({ name: "naver_id" })
+  @JoinTable({ name: "navers" })
   naver: Naver;
 
   @Column()
   project_id: string;
 
   @ManyToMany(() => Project)
-  @JoinColumn({ name: "project_id" })
+  @JoinTable({ name: "projects" })
   project: Project[];
 
   @CreateDateColumn()

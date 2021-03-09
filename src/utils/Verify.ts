@@ -13,7 +13,6 @@ class Verify {
   naversRepository = getCustomRepository(NaversRepository);
 
   async userExistsLogin(email: string) {
-    console.log(email);
     const user = await this.usersRepository.findOne({ email });
     if (!user) throw new AppError("User not found!!");
 

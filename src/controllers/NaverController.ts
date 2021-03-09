@@ -3,6 +3,7 @@ import * as yup from "yup";
 
 import { createQueryBuilder, getCustomRepository } from "typeorm";
 import { NaversRepository } from "../repositories/NaversRepository";
+import { NaversProjectsRepository } from "../repositories/NaversProjectsRepository";
 
 import { AppError } from "../errors/AppError";
 import { Verify } from "../utils/Verify";
@@ -53,16 +54,16 @@ class NaverController {
     await naversRepository.save(naver);
 
     //cria o projeto
-    // const naversProjectRepository = getCustomRepository(
-    //   NaversProjectsRepository
-    // );
+    const naversProjectRepository = getCustomRepository(
+      NaversProjectsRepository
+    );
 
-    // const saveProject = naversProjectRepository.create({
-    //   naver_id: naver.id,
-    //   project_id: projects,
-    // });
+    const saveProject = naversProjectRepository.create({
+      naver_id: "naver.id",
+      project_id: " projects",
+    });
 
-    // await naversProjectRepository.save(saveProject); , saveProject
+    await naversProjectRepository.save(saveProject); //, saveProject
 
     return response.status(201).json({ naver });
   }

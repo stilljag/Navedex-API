@@ -25,6 +25,7 @@ export class CreateNaversProjects1614799899242 implements MigrationInterface {
             default: "now()",
           },
         ],
+
         foreignKeys: [
           {
             name: "FKNaver",
