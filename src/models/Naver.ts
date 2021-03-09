@@ -19,10 +19,10 @@ class Naver {
   name: string;
 
   @Column()
-  birthdate: string;
+  birthdate: Date;
 
   @Column()
-  admission_date: string;
+  admission_date: Date;
 
   @Column()
   job_role: string;

@@ -53,19 +53,22 @@ class NaverController {
 
     await naversRepository.save(naver);
 
-    //cria o projeto
+    ///cria o projeto
+    const naverExists = await new Verify().naverExists(id, naver.id);
     const naversProjectRepository = getCustomRepository(
       NaversProjectsRepository
     );
 
-    const saveProject = naversProjectRepository.create({
-      naver_id: "naver.id",
-      project_id: " projects",
-    });
+    for await (const i of projects) {
+      const saveProject = naversProjectRepository.create({
+        naver_id: naverExists.id,
+        project_id: i,
+      });
 
-    await naversProjectRepository.save(saveProject); //, saveProject
+      await naversProjectRepository.save(saveProject); //, saveProject
+    }
 
-    return response.status(201).json({ naver });
+    return response.status(201).json({ naver, projects });
   }
 
   async update(request: Request, response: Response) {
