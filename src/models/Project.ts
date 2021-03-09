@@ -3,11 +3,13 @@ import {
   CreateDateColumn,
   Entity,
   JoinColumn,
+  OneToMany,
   ManyToOne,
   PrimaryColumn,
 } from "typeorm";
 import { v4 as uuid } from "uuid";
 import { User } from "./User";
+import { NaverProject } from "./NaverProject";
 
 @Entity("projects")
 class Project {
@@ -20,9 +22,12 @@ class Project {
   @Column()
   user_id: string;
 
-  @ManyToOne(() => User)
+  @ManyToOne(() => User, (user) => user.projects)
   @JoinColumn({ name: "user_id" })
-  user: User;
+  userId: User;
+
+  @OneToMany(() => NaverProject, (naverProject) => naverProject.projectId)
+  naversProjects: NaverProject[];
 
   @CreateDateColumn()
   created_at: Date;

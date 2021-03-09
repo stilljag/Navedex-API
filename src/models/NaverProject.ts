@@ -4,7 +4,7 @@ import {
   Entity,
   JoinColumn,
   JoinTable,
-  ManyToMany,
+  ManyToOne,
   PrimaryColumn,
 } from "typeorm";
 import { v4 as uuid } from "uuid";
@@ -16,19 +16,19 @@ class NaverProject {
   @PrimaryColumn()
   readonly id: string;
 
-  @Column()
+  @PrimaryColumn()
   naver_id: string;
 
-  @ManyToMany(() => Naver)
-  @JoinTable({ name: "navers" })
-  naver: Naver;
+  @ManyToOne(() => Naver, (naver) => naver.naversProjects)
+  @JoinColumn({ name: "naver_id" })
+  naverProjectId: Naver;
 
-  @Column()
+  @PrimaryColumn()
   project_id: string;
 
-  @ManyToMany(() => Project)
-  @JoinTable({ name: "projects" })
-  project: Project[];
+  @ManyToOne(() => Project, (project) => project.naversProjects)
+  @JoinColumn({ name: "project_id" })
+  projectId: Project;
 
   @CreateDateColumn()
   created_at: Date;

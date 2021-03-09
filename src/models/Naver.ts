@@ -3,12 +3,14 @@ import {
   CreateDateColumn,
   Entity,
   JoinColumn,
+  OneToMany,
   ManyToOne,
   PrimaryColumn,
 } from "typeorm";
 
 import { v4 as uuid } from "uuid";
 import { User } from "./User";
+import { NaverProject } from "./NaverProject";
 
 @Entity("navers")
 class Naver {
@@ -19,10 +21,10 @@ class Naver {
   name: string;
 
   @Column()
-  birthdate: Date;
+  birthdate: string;
 
   @Column()
-  admission_date: Date;
+  admission_date: string;
 
   @Column()
   job_role: string;
@@ -30,9 +32,12 @@ class Naver {
   @Column()
   user_id: string;
 
-  @ManyToOne(() => User)
+  @ManyToOne(() => User, (user) => user.navers)
   @JoinColumn({ name: "user_id" })
-  user: User;
+  userId: User;
+
+  @OneToMany(() => NaverProject, (naverProject) => naverProject.naverProjectId)
+  naversProjects: NaverProject[];
 
   @CreateDateColumn()
   created_at: Date;
