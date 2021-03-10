@@ -19,12 +19,14 @@
   <a href="https://nave-team.gupy.io/">
     <img alt="NaveTeam" src="https://img.shields.io/badge/Nave-Team-%237159c1?style=flat&logo=ghost">
     </a>
-  
+    
+  <div align="center" style="margin-bottom: 20px;">
+<img src="./src/assets/nave-logo.png" alt="" width="650" height="310"/>
+</div>
+<div align="center">
  
 </p>
-<h1 align="center">
-    <img alt="Nave" title="#Navedex" src="./src/assets/nave.png />
-</h1>
+
 
 <h4 align="center"> 
 	🚧  Navedex's  🚀 Concluído 🚀 🚧
