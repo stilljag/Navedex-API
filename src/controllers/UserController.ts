@@ -1,8 +1,9 @@
 import { Request, Response } from "express";
-import { getCustomRepository } from "typeorm";
-import { UsersRepository } from "../repositories/UsersRepository";
 import { hash } from "bcryptjs";
 import * as yup from "yup";
+
+import { getCustomRepository } from "typeorm";
+import { UsersRepository } from "../repositories/UsersRepository";
 import { AppError } from "../errors/AppError";
 
 class UserController {

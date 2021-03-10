@@ -2,7 +2,6 @@ import { Request, Response } from "express";
 import { compare } from "bcryptjs";
 import { sign } from "jsonwebtoken";
 import * as yup from "yup";
-import "dotenv/config";
 
 import { AppError } from "../errors/AppError";
 import { Verify } from "../utils/Verify";

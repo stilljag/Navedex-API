@@ -36,7 +36,7 @@ class Verify {
     if (orign == "Project") {
       source = await this.projectsRepository.find({ where: query });
     } else {
-      source = await await this.naversRepository.find({ where: query });
+      source = await this.naversRepository.find({ where: query });
     }
 
     //filtra query pelo id do usuário
@@ -61,18 +61,23 @@ class Verify {
     return project;
   }
 
-  async projectExistsNaver(id: string, projects: []) {
-    const projectsExists = await this.projectsRepository.findByIds(projects);
+  async projectExistsNaver(origin: string, id: string, param: []) {
+    let source = [];
+    if (origin == "Project") {
+      source = await this.projectsRepository.findByIds(param);
+    } else {
+      source = await this.naversRepository.findByIds(param);
+    }
 
-    if (projectsExists.length != projects.length)
-      throw new AppError("Project not found!!");
+    if (source.length != param.length)
+      throw new AppError(`${origin} not found!!`);
 
-    projectsExists.forEach((element) => {
+    source.forEach((element) => {
       if (element.user_id != id)
-        throw new AppError("Projects does not belong to the user!!");
+        throw new AppError(`${origin} does not belong to the user!!`);
     });
 
-    return projectsExists;
+    return;
   }
 
   async naverExists(id: string, naver_id: string) {
