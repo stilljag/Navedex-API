@@ -75,10 +75,6 @@ $ cd Navedex-API
 # Instale as dependências
 $ yarn
 
-# Crie na pasta raiz da API o arquivo .env
-$ SECRET=df55340f75b5da454e1c189d56d7f31b
-$ DECODED=
-
 # Execute as migrations
 $ yarn typeorm migration:run
 
