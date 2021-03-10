@@ -1,5 +1,4 @@
 import { Request, Response } from "express";
-import moment from "moment";
 import * as yup from "yup";
 
 import { createQueryBuilder, getCustomRepository } from "typeorm";
@@ -27,7 +26,7 @@ class NaverController {
       birthdate: yup.string().required("Data de nascimento é obrigatório"),
       admission_date: yup.string().required("Data de admissão é obrigatório"),
       job_role: yup.string().required("Função é obrigatório"),
-      //projects: yup.string().required("Projeto é obrigatório"),
+      projects: yup.array().min(1).required("Projeto é obrigatório"),
     });
 
     try {
@@ -40,15 +39,14 @@ class NaverController {
     const userExists = await new Verify().userExists(String(id));
 
     //verifica se os projetos existem
-    await new Verify().projectExistsNaver(String(id), projects);
+    await new Verify().projectExistsNaver("Project", String(id), projects);
 
     //cria o naver
-
     const naversRepository = getCustomRepository(NaversRepository);
     const naver = naversRepository.create({
       name,
-      birthdate: moment(birthdate).format("MM/DD/yyyy"),
-      admission_date: moment(admission_date).format("MM/DD/yyyy"),
+      birthdate,
+      admission_date,
       job_role,
       user_id: userExists.id,
     });
@@ -67,7 +65,7 @@ class NaverController {
         project_id: i,
       });
 
-      await naversProjectRepository.save(saveProject); //, saveProject
+      await naversProjectRepository.save(saveProject);
     }
 
     return response.status(201).json({ naver, projects });
@@ -90,7 +88,7 @@ class NaverController {
       birthdate: yup.string().required("Data de nascimento é obrigatório"),
       admission_date: yup.string().required("Data de admissão é obrigatório"),
       job_role: yup.string().required("Função é obrigatório"),
-      //projects: yup.string().required("Projeto é obrigatório"),
+      projects: yup.array().min(1).required("Projeto é obrigatório"),
     });
 
     try {
@@ -105,9 +103,11 @@ class NaverController {
     //verifica se o Naver existe
     const naverExists = await new Verify().naverExists(id, naver_id);
 
+    //verificacao para update dos projetos
     const naversProjectsRepository = getCustomRepository(
       NaversProjectsRepository
     );
+
     const nave = await naversProjectsRepository.find({
       where: { naver_id: String(naver_id) },
       relations: ["naverProjectId", "projectId"],
@@ -121,6 +121,7 @@ class NaverController {
 
     //verifica se os projetos existem
     const projectExists = await new Verify().projectExistsNaver(
+      "Project",
       String(id),
       projects
     );
@@ -130,8 +131,8 @@ class NaverController {
         .update("navers")
         .set({
           name,
-          birthdate: moment(birthdate).format("MM/DD/yyyy"),
-          admission_date: moment(admission_date).format("MM/DD/yyyy"),
+          birthdate,
+          admission_date,
           job_role,
           user_id: userExists.id,
         })
@@ -139,7 +140,6 @@ class NaverController {
         .execute();
 
       //deleta projetos antigos
-
       for await (const i of projectsArray) {
         await getCustomRepository(NaversProjectsRepository)
           .createQueryBuilder()
@@ -154,7 +154,7 @@ class NaverController {
           project_id: i,
         });
 
-        await naversProjectsRepository.save(saveProject); //, saveProject
+        await naversProjectsRepository.save(saveProject);
       }
 
       return response
@@ -194,32 +194,36 @@ class NaverController {
     const naversProjectsRepository = getCustomRepository(
       NaversProjectsRepository
     );
+
     const nave = await naversProjectsRepository.find({
       where: { naver_id: String(naver_id) },
       relations: ["naverProjectId", "projectId"],
       select: ["project_id", "naverProjectId"],
     });
 
-    const data = { nave };
-    const projectsArray = [];
-    const info = data.nave.map((map) => {
-      projectsArray.push({ Id: map.projectId.id, Name: map.projectId.name });
+    if (nave.length > 0) {
+      const data = { nave };
+      const projectsArray = [];
+      const info = data.nave.map((map) => {
+        projectsArray.push({ id: map.projectId.id, Name: map.projectId.name });
 
-      const data = [
-        {
-          id: map.naverProjectId.id,
-          name: map.naverProjectId.name,
-          birthdate: map.naverProjectId.birthdate,
-          admission_date: map.naverProjectId.admission_date,
-          job_role: map.naverProjectId.job_role,
-        },
-      ];
+        const data = [
+          {
+            id: map.naverProjectId.id,
+            name: map.naverProjectId.name,
+            birthdate: map.naverProjectId.birthdate,
+            admission_date: map.naverProjectId.admission_date,
+            job_role: map.naverProjectId.job_role,
+          },
+        ];
 
-      return data;
-    });
-    const newdata = { Naver: info[0], Projects: projectsArray };
+        return data;
+      });
+      const newdata = { Naver: info[0], Projects: projectsArray };
 
-    return response.json(newdata);
+      return response.json(newdata);
+    }
+    throw new AppError("The user is not linked to any project");
   }
 
   async delete(request: Request, response: Response) {

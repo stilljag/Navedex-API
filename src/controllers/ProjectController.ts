@@ -3,7 +3,6 @@ import * as yup from "yup";
 
 import { createQueryBuilder, getCustomRepository } from "typeorm";
 import { ProjectsRepository } from "../repositories/ProjectsRepository";
-import { NaversRepository } from "../repositories/NaversRepository";
 import { NaversProjectsRepository } from "../repositories/NaversProjectsRepository";
 
 import { AppError } from "../errors/AppError";
@@ -11,7 +10,7 @@ import { Verify } from "../utils/Verify";
 
 class ProjectController {
   async store(request: Request, response: Response) {
-    const { name } = request.body;
+    const { name, navers } = request.body;
     const id = request.params.id;
 
     //validações
@@ -28,6 +27,9 @@ class ProjectController {
     //verifica se o usuario existe
     const userExists = await new Verify().userExists(String(id));
 
+    //verifica se o naver existe
+    await new Verify().projectExistsNaver("Naver", String(id), navers);
+
     //criar o project
     const projectRepository = getCustomRepository(ProjectsRepository);
 
@@ -38,11 +40,27 @@ class ProjectController {
 
     await projectRepository.save(project);
 
-    return response.status(201).json({ project });
+    //cria o naver no banco
+    const projectExists = await new Verify().projectExists(id, project.id);
+
+    const naversProjectRepository = getCustomRepository(
+      NaversProjectsRepository
+    );
+
+    for await (const i of navers) {
+      const saveNaver = naversProjectRepository.create({
+        project_id: projectExists.id,
+        naver_id: i,
+      });
+
+      await naversProjectRepository.save(saveNaver);
+    }
+
+    return response.status(201).json({ project, navers });
   }
 
   async update(request: Request, response: Response) {
-    const { name } = request.body;
+    const { name, navers } = request.body;
 
     const { id, project_id } = request.params;
 
@@ -63,6 +81,28 @@ class ProjectController {
     //verifica se o Projeto existe
     const projectExists = await new Verify().projectExists(id, project_id);
 
+    const naversProjectsRepository = getCustomRepository(
+      NaversProjectsRepository
+    );
+
+    const nave = await naversProjectsRepository.find({
+      where: { project_id: String(project_id) },
+      relations: ["naverProjectId", "projectId"],
+      select: ["project_id", "naverProjectId"],
+    });
+
+    const projectsArray = [];
+    nave.map((map) => {
+      return projectsArray.push(map.naverProjectId.id);
+    });
+
+    //verifica se os navers existem
+    const naversExists = await new Verify().projectExistsNaver(
+      "Naver",
+      String(id),
+      navers
+    );
+
     //atualiza o projeto
     try {
       const project = await createQueryBuilder()
@@ -73,6 +113,24 @@ class ProjectController {
         })
         .where("id = :id", { id: projectExists.id })
         .execute();
+
+      //deleta navers antigos
+      for await (const i of projectsArray) {
+        await getCustomRepository(NaversProjectsRepository)
+          .createQueryBuilder()
+          .delete()
+          .where("naver_id = :naver_id", { naver_id: String(i) })
+          .execute();
+      }
+
+      for await (const i of navers) {
+        const saveNaver = naversProjectsRepository.create({
+          project_id: projectExists.id,
+          naver_id: i,
+        });
+
+        await naversProjectsRepository.save(saveNaver);
+      }
 
       return response
         .status(200)
@@ -108,7 +166,42 @@ class ProjectController {
     //verifica se o Projeto existe
     const projectExists = await new Verify().projectExists(id, project_id);
 
-    return response.json({ Navers: projectExists });
+    //verificação de naver
+
+    const naversProjectsRepository = getCustomRepository(
+      NaversProjectsRepository
+    );
+
+    const nave = await naversProjectsRepository.find({
+      where: { project_id: String(project_id) },
+      relations: ["naverProjectId", "projectId"],
+      select: ["project_id", "naverProjectId"],
+    });
+
+    if (nave.length > 0) {
+      const data = { nave };
+      const projectsArray = [];
+      const info = data.nave.map((map) => {
+        projectsArray.push({ Id: map.projectId.id, Name: map.projectId.name });
+        const data = [
+          {
+            id: map.naverProjectId.id,
+            name: map.naverProjectId.name,
+            birthdate: map.naverProjectId.birthdate,
+            admission_date: map.naverProjectId.admission_date,
+            job_role: map.naverProjectId.job_role,
+          },
+        ];
+
+        return data;
+      });
+      const newdata = { Project: projectsArray[0], Navers: info };
+
+      return response.json(newdata);
+    } else {
+      console.log(projectExists);
+      return response.json({ projectExists });
+    }
   }
 
   async delete(request: Request, response: Response) {
