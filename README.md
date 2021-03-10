@@ -23,7 +23,7 @@
   <div align="center" style="margin-bottom: 20px;">
 <img src="./src/assets/nave-logo.png" alt="" width="650" height="310"/>
 </div>
-<div align="center">
+
  
 </p>
 
