@@ -1,15 +1,15 @@
 <p align="center">
-  <img alt="GitHub language count" src="https://img.shields.io/github/languages/count/stilljag/Navedex-API?color=%2304D361">
+  <img alt="GitHub language count" src="https://img.shields.io/github/languages/count/william-ribeiro/Navedex-API?color=%2304D361">
 
-  <img alt="Repository size" src="https://img.shields.io/github/repo-size/stilljag/Navedex-API">
+  <img alt="Repository size" src="https://img.shields.io/github/repo-size/william-ribeiro/Navedex-API">
 
-  <a href="https://github.com/stilljag/Navedex-API/commits/main">
-    <img alt="GitHub last commit" src="https://img.shields.io/github/last-commit/stilljag/Navedex-API">
+  <a href="https://github.com/william-ribeiro/Navedex-API/commits/main">
+    <img alt="GitHub last commit" src="https://img.shields.io/github/last-commit/william-ribeiro/Navedex-API">
   </a>
     
    <img alt="License" src="https://img.shields.io/badge/license-MIT-brightgreen">
-   <a href="https://github.com/stilljag/Navedex-API/stargazers">
-    <img alt="Stargazers" src="https://img.shields.io/github/stars/stilljag/Navedex-API?style=social">
+   <a href="https://github.com/william-ribeiro/Navedex-API/stargazers">
+    <img alt="Stargazers" src="https://img.shields.io/github/stars/william-ribeiro/Navedex-API?style=social">
   </a>
 
   <a href="https://nave.rs/">
@@ -67,7 +67,7 @@ A API foi um desafio prosposto durante o processo seletivo da [Nave](https://nav
 ```bash
 
 # Clone este repositório
-$ git clone git@github.com:stilljag/Navedex-API.git
+$ git clone git@github.com:william-ribeiro/Navedex-API.git
 
 # Acesse a pasta do projeto no terminal/cmd
 $ cd Navedex-API
@@ -86,7 +86,7 @@ $ yarn dev
 ```
 
 <p align="center">
-  <a href="https://github.com/stilljag/Navedex-API/blob/main/Insomnia-Navidex" target="_blank"><img src="https://insomnia.rest/images/run.svg" alt="Run in Insomnia"></a>
+  <a href="https://github.com/william-ribeiro/Navedex-API/blob/main/Insomnia-Navidex" target="_blank"><img src="https://insomnia.rest/images/run.svg" alt="Run in Insomnia"></a>
 </p>
 
 ---
@@ -95,7 +95,7 @@ $ yarn dev
 
 Foi utilizado na aplicação as seguintes tecnologias
 
-##### [](https://github.com/stilljag/Navedex-API#backend-nodejs--typescript)**Backend** ([NodeJS](https://nodejs.org/en/) + [TypeScript](https://www.typescriptlang.org/))
+##### [](https://github.com/william-ribeiro/Navedex-API#backend-nodejs--typescript)**Backend** ([NodeJS](https://nodejs.org/en/) + [TypeScript](https://www.typescriptlang.org/))
 
 - **[Express](https://expressjs.com/)**
 - **[KnexJS](http://knexjs.org/)**
@@ -120,7 +120,7 @@ Foi utilizado na aplicação as seguintes tecnologias
 
 ## 🦸 Autor
 
-<a href="https://github.com/stilljag/">
+<a href="https://github.com/william-ribeiro/">
  <img style="border-radius: 50%;" src="https://avatars.githubusercontent.com/u/60985185?s=460&u=389f6878e2b972d3f66348a698c7ecfbbb245582&v=4" width="100px;" alt=""/>
  <br />
  <sub><b>William Ribeiro/b></sub></a> <a href="https://blog.rocketseat.com.br/author/thiago/" title="AlunoRocketseat">🚀</a>
